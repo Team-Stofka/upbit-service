@@ -1,4 +1,4 @@
-package com.example.upbitservice;
+package com.stofka.upbitservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
