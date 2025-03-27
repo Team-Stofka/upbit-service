@@ -26,6 +26,7 @@ public class SseService {
     }
 
     public void sendToAll(String message) {
+        System.out.println("SseService.sendToAll: " + message);
         for (SseEmitter emitter : emitterList) {
             try {
                 emitter.send(SseEmitter.event()
