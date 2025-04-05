@@ -49,6 +49,9 @@ jobs:
         id: tag
         run: echo "TAG=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
 
+      - name: Check built JAR location
+        run: ls -R ./upbit-service/build
+
       - name: Build and push image to GHCR
         uses: docker/build-push-action@v5
         with:
