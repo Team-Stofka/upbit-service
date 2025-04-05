@@ -19,6 +19,9 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v3
 
+      - name: ☕ Build Spring Boot JAR
+        run: ./gradlew clean build
+
       - name: 🔧 Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -44,9 +47,9 @@ jobs:
         run: |
           git clone https://x-access-token:${{ secrets.HELM_REPO_PAT }}@github.com/Team-Stofka/upbit-helm.git
           cd upbit-helm/charts/upbit-service
-          sed -i "s/tag: .*/tag: ${{ steps.tag.outputs.TAG }}/" charts/upbit-service/values.yaml
+          sed -i "s/tag: .*/tag: ${{ steps.tag.outputs.TAG }}/" values.yaml
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add charts/upbit-service/values.yaml
+          git add values.yaml
           git commit -m "🔧edit: Update image tag to ${{ steps.tag.outputs.TAG }}"
           git push
