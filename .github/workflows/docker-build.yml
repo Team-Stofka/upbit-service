@@ -32,7 +32,8 @@ jobs:
         run: chmod +x ./upbit-service/gradlew
 
       - name: Build with Gradle
-        run: ./upbit-service/gradlew build
+        working-directory: ./upbit-service
+        run: ./gradlew build
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -51,7 +52,7 @@ jobs:
       - name: Build and push image to GHCR
         uses: docker/build-push-action@v5
         with:
-          context: ./upbit-service
+          context: .
           push: true
           tags: ghcr.io/team-stofka/upbit-service:${{ steps.tag.outputs.TAG }}
 
