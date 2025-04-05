@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_CANDLE}
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+kafka:
+  consumer: ${KAFKA_CONSUMER_CANDLE}
+  topic:
+    candle: ${KAFKA_TOPIC_CANDLE}
