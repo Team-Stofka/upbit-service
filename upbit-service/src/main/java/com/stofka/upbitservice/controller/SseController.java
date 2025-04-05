@@ -13,15 +13,9 @@ public class SseController {
 
     private final SseService sseService;
 
-    @CrossOrigin(origins = "*")
     @GetMapping(value = "/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter connect() {
         return sseService.connect();
-    }
-
-    @PostMapping("/send")
-    public void sendMessage(@RequestBody String message) {
-        sseService.sendToAll(message);
     }
 
 }
