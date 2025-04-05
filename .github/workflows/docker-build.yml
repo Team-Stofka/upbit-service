@@ -6,7 +6,7 @@ on:
   push:
     branches:
       - feature/git
-
+  
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,37 +16,43 @@ jobs:
       packages: write
 
     steps:
-      - name: 📥 Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: 🔨 Set up Gradle
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
 
-      - name: ☕ Build Spring Boot JAR
-        run: gradle clean build
+      - name: Build with Gradle
+        run: ./gradlew build
 
-      - name: 🔧 Set up Docker Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: 🔑 Log in to GitHub Container Registry
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🏷️ Set image tag with datetime
+      - name: Set image tag with datetime
         id: tag
         run: echo "TAG=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
 
-      - name: 🐳 Build and push image to GHCR
+      - name: Build and push image to GHCR
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: ghcr.io/team-stofka/upbit-service:${{ steps.tag.outputs.TAG }}
 
-      - name: 📝 Update image tag in upbit-helm values.yaml
+      - name: Update image tag in upbit-helm values.yaml
         run: |
           git clone https://x-access-token:${{ secrets.HELM_REPO_PAT }}@github.com/Team-Stofka/upbit-helm.git
           cd upbit-helm/charts/upbit-service
