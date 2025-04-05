@@ -64,7 +64,7 @@ jobs:
         run: |
           git clone https://x-access-token:${{ secrets.HELM_REPO_PAT }}@github.com/Team-Stofka/upbit-helm.git
           cd upbit-helm/charts/upbit-service
-          sed -i "s/tag: .*/tag: ${{ steps.tag.outputs.TAG }}/" values.yaml
+          sed -i "s/tag: .*/tag: \"${{ steps.tag.outputs.TAG }}\"/" values.yaml
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add values.yaml
