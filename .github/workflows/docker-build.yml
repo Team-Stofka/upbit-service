@@ -19,6 +19,9 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v3
 
+      - name: 🔨 Set up Gradle
+        uses: gradle/gradle-build-action@v2
+
       - name: ☕ Build Spring Boot JAR
         run: ./gradlew clean build
 
@@ -41,7 +44,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ steps.tag.outputs.TAG }}
+          tags: ghcr.io/team-stofka/upbit-service:${{ steps.tag.outputs.TAG }}
 
       - name: 📝 Update image tag in upbit-helm values.yaml
         run: |
