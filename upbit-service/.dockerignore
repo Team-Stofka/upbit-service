@@ -1,0 +1,23 @@
+# Git
+.git
+.gitignore
+
+# IDE/Editor
+.idea/
+*.iml
+.vscode/
+
+# OS/Temporary files
+.DS_Store
+*.log
+
+# Build outputs ( .jar만 명시적으로 COPY 함)
+build/
+!build/libs/*.jar  # 단, libs/*.jar 은 이미지에 포함되도록 예외 처리
+
+# Gradle-specific
+.gradle/
+**/*.class
+
+# Env
+.env

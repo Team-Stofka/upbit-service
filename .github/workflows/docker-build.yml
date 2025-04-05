@@ -52,7 +52,8 @@ jobs:
       - name: Build and push image to GHCR
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./upbit-service
+          dockerfile: ./upbit-service/Dockerfile
           push: true
           tags: ghcr.io/team-stofka/upbit-service:${{ steps.tag.outputs.TAG }}
 
