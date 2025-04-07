@@ -8,65 +8,86 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class SseService {
 
-    // 종목별 Emitter 리스트
-    private final Map<String, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
+    // ✅ 종목별 Emitter 리스트 (candle 전용)
+    private final Map<String, List<SseEmitter>> candleEmitters = new ConcurrentHashMap<>();
 
-    // 클라이언트 연결 시 종목 코드로 emitter 등록
+    // ✅ 전체 ticker emitter 리스트
+    private final List<SseEmitter> globalTickerEmitters = new CopyOnWriteArrayList<>();
+
+    // ✅ candle용 종목별 연결
     public SseEmitter connect(String code) {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        candleEmitters.computeIfAbsent(code, k -> new CopyOnWriteArrayList<>()).add(emitter);
 
-        emitters.computeIfAbsent(code, k -> new ArrayList<>()).add(emitter);
+        emitter.onCompletion(() -> candleEmitters.getOrDefault(code, new ArrayList<>()).remove(emitter));
+        emitter.onTimeout(() -> candleEmitters.getOrDefault(code, new ArrayList<>()).remove(emitter));
+        emitter.onError(e -> candleEmitters.getOrDefault(code, new ArrayList<>()).remove(emitter));
 
-        emitter.onCompletion(() -> removeEmitter(code, emitter));
-        emitter.onTimeout(() -> removeEmitter(code, emitter));
-        emitter.onError(e -> removeEmitter(code, emitter));
-
-        log.info("SSE connected: {}", code);
+        log.info("SSE candle connected: {}", code);
         return emitter;
     }
 
-    // emitter 제거
-    private void removeEmitter(String code, SseEmitter emitter) {
-        List<SseEmitter> list = emitters.get(code);
-        if (list != null) {
-            list.remove(emitter);
-        }
+    // ✅ ticker용 전체 연결
+    public SseEmitter connectAllTicker() {
+        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        globalTickerEmitters.add(emitter);
+
+        emitter.onCompletion(() -> globalTickerEmitters.remove(emitter));
+        emitter.onTimeout(() -> globalTickerEmitters.remove(emitter));
+        emitter.onError(e -> globalTickerEmitters.remove(emitter));
+
+        log.info("SSE ticker connected");
+        return emitter;
     }
 
-    // Kafka 메시지를 받아서 가공 후 전송
-    public void sendData(Map<String, Object> kafkaMessage) {
-        Map<String, Object> payload = (Map<String, Object>) kafkaMessage.get("payload");
-        if (payload == null || payload.get("code") == null) return;
-
-        // 예: BTC-USD → BTC
-        String coinCode = ((String) payload.get("code")).split("-")[0];
-
-        Map<String, Object> transformed = transformPayload(payload);
-
-        List<SseEmitter> emitterList = emitters.getOrDefault(coinCode, new ArrayList<>());
-
-        for (SseEmitter emitter : emitterList) {
+    // ✅ ticker 메시지 전체 브로드캐스트 (가공 없이)
+    public void broadcastToAllTickerClients(Map<String, Object> kafkaMessage) {
+        for (SseEmitter emitter : new ArrayList<>(globalTickerEmitters)) {
             try {
                 emitter.send(SseEmitter.event()
-                        .name("coin-data")
-                        .data(Map.of("payload", transformed)));
-            } catch (IOException e) {
-                emitter.completeWithError(e);
+                        .name("ticker-data")
+                        .data(kafkaMessage));
+            } catch (IOException | IllegalStateException e) {
+                emitter.completeWithError(e); // 안전하게 종료
+                globalTickerEmitters.remove(emitter); // ❗ 명시적으로 제거
+                log.warn("Removed closed SSE connection (ticker): {}", e.getMessage());
             }
         }
     }
 
-    // payload 데이터 변환
-    private Map<String, Object> transformPayload(Map<String, Object> payload) {
+    // ✅ candle 메시지 전송 (가공 포함, 종목별로)
+    public void sendCandleData(Map<String, Object> kafkaMessage) {
+        Map<String, Object> payload = (Map<String, Object>) kafkaMessage.get("payload");
+        if (payload == null || payload.get("code") == null) return;
+
+        String coinCode = ((String) payload.get("code"));
+        Map<String, Object> transformed = transformCandlePayload(payload);
+
+        List<SseEmitter> emitters = candleEmitters.getOrDefault(coinCode, Collections.emptyList());
+        for (SseEmitter emitter : new ArrayList<>(emitters)) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("candle-data")
+                        .data(Map.of("payload", transformed)));
+            } catch (IOException | IllegalStateException e) {
+                emitter.completeWithError(e);
+                candleEmitters.get(coinCode).remove(emitter); // ❗ 제거
+                log.warn("Removed closed SSE connection (candle): {}", e.getMessage());
+            }
+        }
+    }
+
+    private Map<String, Object> transformCandlePayload(Map<String, Object> payload) {
         Map<String, Object> result = new HashMap<>();
         result.put("type", "candle.1s");
-        result.put("code", ((String) payload.get("code")).split("-")[0]);
+        result.put("code", (payload.get("code")));
         result.put("opening_price", payload.get("opening_price"));
         result.put("high_price", payload.get("high_price"));
         result.put("low_price", payload.get("low_price"));
@@ -78,3 +99,4 @@ public class SseService {
         return result;
     }
 }
+

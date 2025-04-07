@@ -12,5 +12,7 @@ spring:
 
 kafka:
   consumer: ${KAFKA_CONSUMER_CANDLE}
+  consumer2: ${KAFKA_CONSUMER_TICKER}
   topic:
     candle: ${KAFKA_TOPIC_CANDLE}
+    ticker: ${KAFKA_TOPIC_TICKER}
