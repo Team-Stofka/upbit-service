@@ -15,7 +15,7 @@ public class KafkaComponent {
     private final SseService sseService;
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    @KafkaListener(topics = "${kafka.topic.ticker}", groupId = "${kafka.consumer2}")
+    @KafkaListener(topics = "${kafka.topic.ticker}", groupId = "${kafka.consumer}")
     public void listenTicker(String message) {
         try {
             Map<String, Object> json = objectMapper.readValue(message, Map.class);
