@@ -92,7 +92,7 @@ public class SseService {
         for (SseEmitter emitter : new ArrayList<>(emitters)) {
             try {
                 emitter.send(SseEmitter.event()
-                        .name("candle-data")
+                        .name("postgres-candle-data")
                         .data(Map.of("payload", payload)));
             } catch (IOException | IllegalStateException e) {
                 emitter.completeWithError(e);

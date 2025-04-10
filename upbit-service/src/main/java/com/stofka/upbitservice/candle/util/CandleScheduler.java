@@ -29,62 +29,62 @@ public class CandleScheduler {
 
     @Scheduled(cron = "5 * * * * *") // 매 1분 5초
     public void send1Min() {
-        send("1m");
+        send("candle.1m");
     }
 
     @Scheduled(cron = "5 */3 * * * *") // 매 3분 5초
     public void send3Min() {
-        send("3m");
+        send("candle.3m");
     }
 
     @Scheduled(cron = "5 */5 * * * *") // 매 5분 5초
     public void send5Min() {
-        send("5m");
+        send("candle.5m");
     }
 
     @Scheduled(cron = "5 */10 * * * *") // 매 10분 5초
     public void send10Min() {
-        send("10m");
+        send("candle.10m");
     }
 
     @Scheduled(cron = "5 */15 * * * *") // 매 15분 5초
     public void send15Min() {
-        send("15m");
+        send("candle.15m");
     }
 
     @Scheduled(cron = "5 */30 * * * *") // 매 30분 5초
     public void send30Min() {
-        send("30m");
+        send("candle.30m");
     }
 
     @Scheduled(cron = "5 0 * * * *") // 매 시간 정각 5초
     public void send1Hour() {
-        send("60m");
+        send("candle.1h");
     }
 
     @Scheduled(cron = "5 0 */4 * * *") // 매 4시간 정각 5초
     public void send4Hour() {
-        send("240m");
+        send("candle.4h");
     }
 
     @Scheduled(cron = "5 0 0 * * *") // 매일 자정 5초
     public void send1Day() {
-        send("1d");
+        send("candle.1d");
     }
 
     private void send(String interval) {
         List<? extends CandleBase> candles;
 
         switch (interval) {
-            case "1m" -> candles = minuteCandleRepository.findLatestCandles();
-            case "3m" -> candles = threeMinuteCandleRepository.findLatestCandles();
-            case "5m" -> candles = fiveMinuteCandleRepository.findLatestCandles();
-            case "10m" -> candles = tenMinuteCandleRepository.findLatestCandles();
-            case "15m" -> candles = fifteenMinuteCandleRepository.findLatestCandles();
-            case "30m" -> candles = thirtyMinuteCandleRepository.findLatestCandles();
-            case "60m" -> candles = hourCandleRepository.findLatestCandles();
-            case "240m" -> candles = fourHourCandleRepository.findLatestCandles();
-            case "1d" -> candles = dayCandleRepository.findLatestCandles();
+            case "candle.1m" -> candles = minuteCandleRepository.findLatestCandles();
+            case "candle.3m" -> candles = threeMinuteCandleRepository.findLatestCandles();
+            case "candle.5m" -> candles = fiveMinuteCandleRepository.findLatestCandles();
+            case "candle.10m" -> candles = tenMinuteCandleRepository.findLatestCandles();
+            case "candle.15m" -> candles = fifteenMinuteCandleRepository.findLatestCandles();
+            case "candle.30m" -> candles = thirtyMinuteCandleRepository.findLatestCandles();
+            case "candle.1h" -> candles = hourCandleRepository.findLatestCandles();
+            case "candle.4h" -> candles = fourHourCandleRepository.findLatestCandles();
+            case "candle.1d" -> candles = dayCandleRepository.findLatestCandles();
             default -> {
                 log.warn("Unknown interval: {}", interval);
                 return;
@@ -94,7 +94,7 @@ public class CandleScheduler {
         for (CandleBase candle : candles) {
             Map<String, Object> payload = Map.of(
                     "code", candle.getCode(),
-                    "interval", interval,
+                    "type", interval,
                     "timestamp", candle.getCandleTime(),
                     "opening_price", candle.getOpeningPrice(),
                     "high_price", candle.getHighPrice(),
