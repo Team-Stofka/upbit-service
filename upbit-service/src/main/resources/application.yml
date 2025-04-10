@@ -10,6 +10,16 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
+  datasource:
+    url: ${POSTGRES_URL}
+    username: ${POSTGRES_USER_NAME}
+    password: ${POSTGRES_USER_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jackson:
+    date-format: yyyy-MM-dd'T'HH:mm:ss
+    time-zone: Asia/Seoul
+
 kafka:
   consumer: ${KAFKA_CONSUMER_CANDLE}
   topic:
