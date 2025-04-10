@@ -103,7 +103,7 @@ public class CandleScheduler {
                     "candle_acc_trade_volume", candle.getCandleAccTradeVolume(),
                     "candle_acc_trade_price", candle.getCandleAccTradePrice()
             );
-            sseService.sendCandleData(payload);
+            sseService.sendCronCandleData(payload);
         }
 
         log.info("✅ Sent {}-interval candle data ({} items)", interval, candles.size());
