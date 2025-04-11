@@ -62,7 +62,7 @@ public class SseService {
         }
     }
 
-    // ✅ candle 메시지 전송 (가공 포함, 종목별로)
+    // ✅ kafka candle 메시지 전송 (가공 포함, 종목별로)
     public void sendCandleData(Map<String, Object> kafkaMessage) {
         Map<String, Object> payload = (Map<String, Object>) kafkaMessage.get("payload");
         if (payload == null || payload.get("code") == null) return;
@@ -80,6 +80,24 @@ public class SseService {
                 emitter.completeWithError(e);
                 candleEmitters.get(coinCode).remove(emitter); // ❗ 제거
                 log.warn("Removed closed SSE connection (candle): {}", e.getMessage());
+            }
+        }
+    }
+
+    // postgre candle 데이터 전송
+    public void sendCronCandleData(Map<String, Object> payload) {
+        String coinCode = (String) payload.get("code");
+        List<SseEmitter> emitters = candleEmitters.getOrDefault(coinCode, Collections.emptyList());
+
+        for (SseEmitter emitter : new ArrayList<>(emitters)) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("postgres-candle-data")
+                        .data(Map.of("payload", payload)));
+            } catch (IOException | IllegalStateException e) {
+                emitter.completeWithError(e);
+                candleEmitters.get(coinCode).remove(emitter);
+                log.warn("SSE 제거됨 (cron): {}", e.getMessage());
             }
         }
     }
