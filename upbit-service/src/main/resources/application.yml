@@ -38,3 +38,9 @@ kafka:
   topic:
     candle: ${KAFKA_TOPIC_CANDLE}
     ticker: ${KAFKA_TOPIC_TICKER}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
