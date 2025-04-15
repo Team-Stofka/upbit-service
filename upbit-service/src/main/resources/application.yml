@@ -42,5 +42,6 @@ kafka:
 management:
   endpoints:
     web:
+      base-path: /upbit-service
       exposure:
         include: health, info, prometheus
