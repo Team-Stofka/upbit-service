@@ -14,7 +14,7 @@ public class CheckController {
 
     @GetMapping("/check")
     public ResponseEntity<String> check() {
-        return ResponseEntity.ok("Hello ArgoCD");
+        return ResponseEntity.ok("OK");
     }
 
 }
