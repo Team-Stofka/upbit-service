@@ -68,5 +68,5 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add values.yaml
-          git commit -m "🔧edit: Update image tag to ${{ steps.tag.outputs.TAG }}"
+          git commit -m "🔧edit: Update upbit-service image tag to ${{ steps.tag.outputs.TAG }}"
           git push

@@ -12,4 +12,9 @@ public class CheckController {
         return ResponseEntity.ok("OK");
     }
 
+    @GetMapping("/check")
+    public ResponseEntity<String> check() {
+        return ResponseEntity.ok("OK");
+    }
+
 }
